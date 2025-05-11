@@ -1,0 +1,4 @@
+let X=3
+     in
+   Print(X,X**2)
+   //  Prints (3,9)

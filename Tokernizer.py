@@ -1,0 +1,73 @@
+import sys
+import re
+from dataclasses import dataclass
+
+@dataclass
+class Token:
+    type: str
+    value: str
+
+    def __str__(self):
+        return f"<{self.type}:{self.value}>"
+
+# Define keywords for RPAL
+KEYWORDS = {
+    'let', 'in', 'fn', 'where', 'rec', 'and', 'within',
+    'aug', 'or', 'not', 'gr', 'ge', 'ls', 'le', 'eq', 'ne',
+    'true', 'false', 'nil', 'dummy','@', '&', '|'
+}
+
+# Token specifications in priority order
+token_specification = [
+    ('COMMENT', r'//.*'),
+    ('SKIP', r'[ \t\r\n]+'),
+    ('STRING', r"'(\\'|\\\\|\\t|\\n|[^'])*'"),
+    ('IDENTIFIER', r'[A-Za-z][A-Za-z0-9_]*'),
+    ('INTEGER', r'\d+'),
+    ('OPERATOR', r'[\+\-\*\/<>&\.@:=~|$!#%^_\[\]{}\"‘\?]+'),
+    ('PUNCTUATION', r'[(),;]'),
+    ('MISMATCH', r'.'),
+]
+
+token_re = re.compile('|'.join(f'(?P<{name}>{pattern})' for name, pattern in token_specification))
+
+def tokenize(code):
+    tokens = []
+    for match in token_re.finditer(code):
+        kind = match.lastgroup
+        value = match.group()
+
+        if kind in {'SKIP', 'COMMENT'}:
+            continue
+        elif kind == 'IDENTIFIER':
+            if value in KEYWORDS:
+                tokens.append(Token("KEYWORD", value))
+            else:
+                tokens.append(Token("IDENTIFIER", value))
+        elif kind == 'INTEGER':
+            tokens.append(Token("INTEGER", value))
+        elif kind == 'STRING':
+            tokens.append(Token("STRING", value))
+        elif kind == 'OPERATOR':
+            tokens.append(Token("OPERATOR", value))
+        elif kind == 'PUNCTUATION':
+            tokens.append(Token("PUNCTUATION", value))
+        elif kind == 'MISMATCH':
+            raise RuntimeError(f"Unexpected character: {value}")
+    return tokens
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python myrpal.py file_name")
+        sys.exit(1)
+
+    filename = sys.argv[1]
+    with open(filename, 'r') as f:
+        code = f.read()
+
+    tokens = tokenize(code)
+    for token in tokens:
+        print(token)
+
+if __name__ == "__main__":
+    main()
