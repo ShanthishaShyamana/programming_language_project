@@ -1,0 +1,11 @@
+let rec getFirstDegit n = ( n ge 0 & n < 10) -> n | getFirstDegit (n/10) and rec getNumDegits n = ( n ge 0 & n < 10) -> 0 | (1+ (getNumDegits (n/10)))
+in
+let rec getLastDegit n = ( n ge 0 & n < 10) -> n | getLastDegit (n - ((getFirstDegit n) * 10 ** (getNumDegits n)))
+in
+let RemainPart n = (n - ((getFirstDegit n) * 10 ** (getNumDegits n)))/10
+in
+let rec CheckPalindrome n = (n < 10 & n ge 0) -> true | ((getFirstDegit n) eq (getLastDegit n)) -> (CheckPalindrome (RemainPart n)) | false
+in
+let palindromes n m = getPalindromes n m nil where rec getPalindromes t m a = ( m < t ) -> a | ( CheckPalindrome t) ->  (getPalindromes (t+1) m (a aug t)) | (getPalindromes (t+1) m a)
+in
+Print ( palindromes 12 152)
