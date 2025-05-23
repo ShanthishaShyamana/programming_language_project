@@ -1,6 +1,7 @@
 import sys
 import re
 from dataclasses import dataclass
+from parser import Parser
 
 @dataclass
 class Token:
@@ -66,8 +67,26 @@ def main():
         code = f.read()
 
     tokens = tokenize(code)
-    for token in tokens:
-        print(token)
+    # for token in tokens:
+    #     print(token)
+
+    # Initialize the parser with the tokens
+      # Make sure your Parser class is defined in parser.py
+
+    # print(" Parser: Initializing")
+    parser_instance = Parser(tokens)
+
+
+    while True:
+        token = parser_instance.read()
+        if token is None:
+            break
+    
+    # print stack
+  
+
+    
+
 
 if __name__ == "__main__":
     main()
