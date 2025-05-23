@@ -6,7 +6,7 @@ class Parser:
         self.current_token = None
         self.pos = 0
 
-    def read(self):
+    def read(self , expected=None):
         global stack
         stack = []
 
@@ -16,6 +16,11 @@ class Parser:
         else:
             
             return None
+        
+                # Check if expected token matches current token
+        if expected is not None and self.current_token.value != expected:
+            raise SyntaxError(f"Expected '{expected}', but got '{self.current_token.value}' at position {self.pos}")
+        
         
     
         self.pos += 1
@@ -138,6 +143,34 @@ class Parser:
         print("Parser: parse_Bp")
 
     def parse_A(self):
+
+        if self.current_token.value == '+':
+            self.read('+')
+            self.parse_At()
+
+        elif self.current_token.value == '-':
+            self.read('-')
+            self.parse_At()
+            self.buildTree("neg", 1)
+
+
+        else:
+            self.parse_At()
+       
+        plus = '+'
+        while self.current_token.value == '+' or self.current_token.value == '-':
+
+            if self.current_token.value=='-':
+                self.read('-')
+                self.parse_At()
+                self.buildTree("-", 2)
+
+            elif self.current_token.value=='+':
+                self.read('+')
+                self.parse_At()
+                self.buildTree("+", 2)
+
+            
         print("Parser: parse_A")
 
     def parse_At(self):
