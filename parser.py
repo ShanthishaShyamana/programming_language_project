@@ -76,7 +76,34 @@ class Parser:
 
 
     def parse_E(self):
-        print("Parser: parse_E")
+         match self.current_token.value:
+
+            case 'let':
+                self.read("let")
+                self.parse_D()  
+                self.read("in")
+                self.parse_E()
+
+                self.buildTree('let',2)
+
+            case 'fn':
+                self.read("fn")
+
+                n = 1 # Vb can run until it gets Identifier or a Open Bracket
+                self.parse_Vb()
+                while(self.current_token.type == "IDENTIFIER" or self.current_token.value == "("):
+                    self.parse_Vb()
+                    n += 1
+                   
+                self.read(".")
+                self.parse_E()
+                self.buildTree('lambda',n+1)
+                
+            case  _:
+                self.parse_Ew()
+
+        #print("Parser: parse_E")
+
 
     def parse_Ew(self):
         print("Parser: parse_Ew")
