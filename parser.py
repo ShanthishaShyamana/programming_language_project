@@ -122,22 +122,71 @@ class Parser:
         print("Parser: parse_D")
 
     def parse_T(self):
+        
+        self.parse_Ta()
+        n = 1
+        while(self.current_token.value == ","):
+            self.read(",")
+            self.parse_Ta()
+            n += 1
+        self.buildTree('tau',n+1)
+
         print("Parser: parse_T")
 
     def parse_Ta(self):
+        self.parse_Tc()
+
+        while(self.current_token.value == "aug"):
+            self.read("aug")
+            self.parse_Tc()
+            self.buildTree('aug',2)
+
         print("Parser: parse_Ta")
 
     def parse_Tc(self):
+        self.parse_B()
+        if(self.current_token.value == "->"):
+            self.read("->")
+            self.parse_Tc()
+            self.read("|")
+            self.parse_Tc()
+            self.buildTree('arrow',3)
+
         print("Parser: parse_Tc")
 
     def parse_B(self):
+        self.parse_Bt()
+
+        while(self.current_token.value == "or"):
+            self.read("or")
+            self.parse_Bt()
+            self.buildTree('or',2)
+
         print("Parser: parse_B")
 
     def parse_Bt(self):
+        self.parse_Bs()
+
+        while(self.current_token.value == "&"):
+            self.read("&")
+            self.parse_Bs()
+            self.buildTree('&',2)
+
         print("Parser: parse_Bt")
 
     def parse_Bs(self):
+
+        if self.current_token.value == "not":
+            self.read("not")
+            self.parse_Bp()
+            self.buildTree('not',1)
+        
+        else:
+            self.parse_Bp()
+
         print("Parser: parse_Bs")
+
+
 
     def parse_Bp(self):
         print("Parser: parse_Bp")
