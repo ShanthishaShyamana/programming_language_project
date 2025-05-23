@@ -13,7 +13,6 @@ class Parser:
         if (self.pos < len(self.tokens)):
             self.current_token = self.tokens[self.pos]
             
-            
         else:
             
             return None
@@ -106,7 +105,13 @@ class Parser:
 
 
     def parse_Ew(self):
+        self.parse_T()
+        if(self.current_token.value == "where"):
+            self.read("where")
+            self.parse_Dr()
+            self.buildTree('where',2)
         print("Parser: parse_Ew")
+
 
     def parse_D(self):
         print("Parser: parse_D")
