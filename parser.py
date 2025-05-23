@@ -113,11 +113,22 @@ class Parser:
         print("Parser: parse_Ew")
 
 
-    def parse_D(self):
-        print("Parser: parse_D")
+    # def parse_D(self):
+        
+    #     print("Parser: parse_D")
+
 
     def parse_T(self):
-        print("Parser: parse_T")
+
+        self.parse_Ta()
+        n = 1
+        while(self.current_token.value == ","):
+            self.read(",")
+            self.parse_Ta()
+            n += 1
+        self.buildTree('tau',n+1)
+        
+        #print("Parser: parse_T")
 
     def parse_Ta(self):
         print("Parser: parse_Ta")
@@ -138,6 +149,26 @@ class Parser:
         print("Parser: parse_Bp")
 
     def parse_A(self):
+
+
+
+
+
+
+
+
+
+        self.parse_A()
+
+        if(self.current_token.value == "+"):
+            self.read("+")
+            self.parse_At()
+            self.buildTree('+',2)
+        elif(self.current_token.value == "-"):
+            self.read("-")
+            self.parse_At()
+            self.buildTree('-',2)
+
         print("Parser: parse_A")
 
     def parse_At(self):
