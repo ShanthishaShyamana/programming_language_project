@@ -123,7 +123,23 @@ class Parser:
     def parse_Rn(self):
         print("Parser: parse_Rn")
 
-        
+    def parse_D(self):
+        print("Parser: parse_D")
+
+    def parse_Da(self):
+        print("Parser: parse_Da")
+    
+    def parse_Dr(self):
+        print("Parser: parse_Dr")
+
+    def parse_Db(self):
+        print("Parser: parse_Db")
+
+    def parse_Vb(self):
+        print("Parser: parse_Vb")
+
+    def parse_Vl(self):
+        print("Parser: parse_Vl")
 
     
     
