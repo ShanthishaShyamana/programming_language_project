@@ -16,9 +16,12 @@ class Parser:
         else:
             
             return None
-        
+        if expected in ["<IDENTIFIER>", "<STRING>", "<INTEGER>"]:
+            if self.current_token.type != expected:
+                raise SyntaxError(f"Expected token type '{expected}', but got '{self.current_token.type}' at position {self.pos}")
+
                 # Check if expected token matches current token
-        if expected is not None and self.current_token.value != expected:
+        elif expected is not None and self.current_token.value != expected:
             raise SyntaxError(f"Expected '{expected}', but got '{self.current_token.value}' at position {self.pos}")
         
         
@@ -206,7 +209,7 @@ class Parser:
         else:
             self.parse_At()
        
-        plus = '+'
+    
         while self.current_token.value == '+' or self.current_token.value == '-':
 
             if self.current_token.value=='-':
@@ -223,12 +226,50 @@ class Parser:
         print("Parser: parse_A")
 
     def parse_At(self):
+
+        
+        self.parse_Af()
+        # print('At->Af')
+        while self.current_token.value == '*' or self.current_token.value == '/':
+            
+            if self.current_token.value == '/':
+                self.read('/')
+                self.parse_Af()
+                self.buildTree("/", 2)
+
+            elif self.current_token.value == '*':   
+                self.read('*')
+                self.parse_Af()
+                self.buildTree("*", 2)
+            
+
         print("Parser: parse_At")
 
     def parse_Af(self):
+
+                # print('procAf')
+
+        self.parse_Ap()
+        # print('Af->Ap')
+        while self.current_token.value == '**':
+            self.read('**')
+            self.parse_Ap()
+            # print('Af->Ap ** Af')
+            self.buildTree("**", 2)
+
         print("Parser: parse_Af")
 
     def parse_Ap(self):
+
+        self.parse_R()
+        # print('Ap->R')
+        while self.current_token.value == '@':
+            self.read('@')
+            self.read("<IDENTIFIER>")
+            self.parse_R()
+            # print('Ap->R @ R')
+            self.buildTree("@", 3)
+
         print("Parser: parse_Ap")
 
     def parse_R(self):
