@@ -340,8 +340,8 @@ class Parser:
             self.read("and")
             self.parse_Dr()
             m += 1
-
-        self.buildTree('and', m)
+        if m>1:
+            self.buildTree('and', m)
         
         print("Parser: parse_Da")
     
@@ -368,20 +368,38 @@ class Parser:
 
         elif self.current_token.type == "IDENTIFIER":
             self.read("<IDENTIFIER>")
-            self.parse_Vb()
-            k=1
-            while self.current_token.value == "(" or self.current_token.type == "IDENTIFIER":
-                self.parse_Vb()
-                k += 1
-            self.read("=")
-            self.parse_E()
-            self.buildTree('fcn_form', k+2)
+            p=1
+            if self.current_token.value == "(" or self.current_token.type == "IDENTIFIER":
+                vb_count = 0
+                while self.current_token.value == "(" or self.current_token.type == "IDENTIFIER":
+                    self.parse_Vb()
+                    vb_count += 1
+                if self.current_token.value == "=":
+                    self.read("=")
+                    self.parse_E()
+                    self.buildTree('=', vb_count + 1+p)
 
-        else:
-            self.parse_Vl()
-            self.read("=")
-            self.parse_E()
-            self.buildTree('=', 2)
+            elif self.current_token.value == "=":
+                self.read("=")
+                self.parse_E()
+                self.buildTree('=', 2 )
+            
+            elif self.current_token.value == ",":
+                self.read(",")
+                self.read("<IDENTIFIER>")
+                p+= 1
+                while self.current_token.value == ",":
+                    self.read(",")
+                    self.read("<IDENTIFIER>")
+                    p += 1
+                self.buildTree("=", p + 1)
+
+                
+        # else:
+        #     self.parse_Vl()
+        #     self.read("=")
+        #     self.parse_E()
+        #     self.buildTree('=', 2)
 
 
         print("Parser: parse_Db")
@@ -389,17 +407,18 @@ class Parser:
     def parse_Vb(self):
         if self.current_token.type == "IDENTIFIER":
             self.read("<IDENTIFIER>")
-            # print('Vb->id')
+           
         elif self.current_token.value == "(":
             self.read("(")
-            self.parse_Vl()
-            self.read(")")
-            # print('Vb->(Vb)')
-        elif self.current_token.value == "(":
-            self.read("(")
-            self.read(")")
-            self.buildTree('()', 0)
-            # print('Vb->[Vb]')
+            if self.current_token.value == ")":
+                self.read(")")
+                # print('Vb->()')
+                self.buildTree("()", 0)
+            else:
+                self.parse_Vl()
+                self.read(")")
+                # print('Vb->Vl)')
+
         print("Parser: parse_Vb")
 
 
@@ -407,6 +426,14 @@ class Parser:
 
     def parse_Vl(self):
 
+        self.read("<IDENTIFIER>")
+        v =1
+        while self.current_token.value == ",":
+            self.read(",")
+            self.read("<IDENTIFIER>")
+            v += 1
+
+        self.buildTree(",'", v)
         print("Parser: parse_Vl")
 
     
