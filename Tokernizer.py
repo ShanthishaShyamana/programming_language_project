@@ -33,7 +33,9 @@ token_specification = [
 token_re = re.compile('|'.join(f'(?P<{name}>{pattern})' for name, pattern in token_specification))
 
 def tokenize(code):
+
     tokens = []
+
     for match in token_re.finditer(code):
         kind = match.lastgroup
         value = match.group()
@@ -58,29 +60,59 @@ def tokenize(code):
     return tokens
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python myrpal.py file_name")
+    if len(sys.argv) < 3 or sys.argv[1] != '-ast':
+        print("Usage: python myrpal.py -ast file_name")
         sys.exit(1)
 
-    filename = sys.argv[1]
+    filename = sys.argv[2]
     with open(filename, 'r') as f:
         code = f.read()
 
     tokens = tokenize(code)
+    # Print tokens for debugging
     # for token in tokens:
     #     print(token)
 
-    # Initialize the parser with the tokens
-      # Make sure your Parser class is defined in parser.py
-
-    # print(" Parser: Initializing")
+    # for i in range(len(tokens)):
+        # print(f"{i}: {tokens[i]}")
+    
     parser_instance = Parser(tokens)
+    parser_instance.parse_E()  # Start parsing from the root rule
+
+    # Now print AST
+    stack = parser_instance.get_stack()
+    print_ast(stack[-1])  # stack[-1] is the root of the AST
 
 
-    while True:
-        token = parser_instance.read()
-        if token is None:
-            break
+def print_ast(node, indent=0):
+    print('.' * indent + node.type if node.value is None else f"{'.' * indent}<{node.type}:{node.value}>")
+    for child in reversed(node.child):  # Print in reverse to maintain correct order
+        print_ast(child, indent + 1)
+
+# def main():
+#     if len(sys.argv) < 2:
+#         print("Usage: python myrpal.py file_name")
+#         sys.exit(1)
+
+#     filename = sys.argv[1]
+#     with open(filename, 'r') as f:
+#         code = f.read()
+
+#     tokens = tokenize(code)
+#     # for token in tokens:
+#     #     print(token)
+
+#     # Initialize the parser with the tokens
+#       # Make sure your Parser class is defined in parser.py
+
+#     # print(" Parser: Initializing")
+#     parser_instance = Parser(tokens)
+
+
+#     while True:
+#         token = parser_instance.read()
+#         if token is None:
+#             break
     
     # print stack
   

@@ -3,20 +3,16 @@ from ASTnode import ASTnode
 class Parser:
     def __init__(self, tokens):  
         self.tokens = tokens
-        self.current_token = None
+        self.current_token = self.tokens[0]
         self.pos = 0
+        global stack
+        stack = []  # Initialize the stack to hold AST nodes
 
     def read(self , expected=None):
-        global stack
-        stack = []
+        # print ("read ", expected)
 
-        if (self.pos < len(self.tokens)):
-            self.current_token = self.tokens[self.pos]
-            
-        else:
-            
-            return None
-        if expected in ["<IDENTIFIER>", "<STRING>", "<INTEGER>"]:
+
+        if expected in ["IDENTIFIER", "STRING", "INTEGER"]:
             if self.current_token.type != expected:
                 raise SyntaxError(f"Expected token type '{expected}', but got '{self.current_token.type}' at position {self.pos}")
 
@@ -26,16 +22,17 @@ class Parser:
         
         
     
-        self.pos += 1
+    
         if self.current_token.type in ["STRING", "IDENTIFIER", "INTEGER"]:
             terminalNode = ASTnode(str(self.current_token.type))
             terminalNode.value = self.current_token.value
             stack.append(terminalNode)
 
+
             # self.read_stack()
             
             # print(terminalNode)
-            return terminalNode
+            # return terminalNode
  
         if self.current_token.value in ['true', 'false', 'nil', 'dummy']:
             terminalNode = ASTnode(str(self.current_token.type))
@@ -43,22 +40,31 @@ class Parser:
             stack.append(terminalNode)
             # self.read_stack()
             # print(terminalNode)
-            return terminalNode
+        #     return terminalNode
+        # else:
+        #     return self.current_token
+        self.pos += 1
+        if (self.pos < len(self.tokens)):
+            self.current_token = self.tokens[self.pos]
+            
         else:
-            return self.current_token
+            
+            return None
         
        
 
-    def read_stack(self):
+    # def read_stack(self):
         
-        if len(stack) > 0:
-            node = stack.pop()
-            print(node)
+    #     if len(stack) > 0:
+    #         node = stack.pop()
+    #         print(node)
 
 
     def buildTree(self , token, numberOfChildren):
 
         node = ASTnode(token)
+        # self.read_stack()
+        # print("Parser: buildTree", token, numberOfChildren)
 
         while numberOfChildren > 0:
             # #print("error in while loop")
@@ -83,6 +89,8 @@ class Parser:
 
 
     def parse_E(self):
+         
+         
          match self.current_token.value:
 
             case 'let':
@@ -118,7 +126,7 @@ class Parser:
             self.read("where")
             self.parse_Dr()
             self.buildTree('where',2)
-        print("Parser: parse_Ew")
+        # print("Parser: parse_Ew")
 
 
     # def parse_D(self):
@@ -132,9 +140,10 @@ class Parser:
             self.read(",")
             self.parse_Ta()
             n += 1
-        self.buildTree('tau',n+1)
+        if n > 1:
+            self.buildTree('tau',n)
 
-        print("Parser: parse_T")
+        # print("Parser: parse_T")
 
     def parse_Ta(self):
         self.parse_Tc()
@@ -144,7 +153,7 @@ class Parser:
             self.parse_Tc()
             self.buildTree('aug',2)
 
-        print("Parser: parse_Ta")
+        # print("Parser: parse_Ta")
 
     def parse_Tc(self):
         self.parse_B()
@@ -153,9 +162,9 @@ class Parser:
             self.parse_Tc()
             self.read("|")
             self.parse_Tc()
-            self.buildTree('arrow',3)
+            self.buildTree('->',3)
 
-        print("Parser: parse_Tc")
+        # print("Parser: parse_Tc")
 
     def parse_B(self):
         self.parse_Bt()
@@ -165,7 +174,7 @@ class Parser:
             self.parse_Bt()
             self.buildTree('or',2)
 
-        print("Parser: parse_B")
+        # print("Parser: parse_B")
 
     def parse_Bt(self):
         self.parse_Bs()
@@ -175,7 +184,7 @@ class Parser:
             self.parse_Bs()
             self.buildTree('&',2)
 
-        print("Parser: parse_Bt")
+        # print("Parser: parse_Bt")
 
     def parse_Bs(self):
 
@@ -187,12 +196,46 @@ class Parser:
         else:
             self.parse_Bp()
 
-        print("Parser: parse_Bs")
+        # print("Parser: parse_Bs")
 
 
 
     def parse_Bp(self):
-        print("Parser: parse_Bp")
+        self.parse_A()
+
+        if self.current_token.value == "gr" or self.current_token.value == ">":
+            self.read(self.current_token.value)
+            self.parse_A()
+            self.buildTree('gr', 2)
+        
+        elif self.current_token.value == "ge" or self.current_token.value == ">=":
+            self.read(self.current_token.value)
+            self.parse_A()
+            self.buildTree('ge', 2)
+
+        elif self.current_token.value == "ls" or self.current_token.value == "<":
+            self.read(self.current_token.value)
+            self.parse_A()
+            self.buildTree('ls', 2)
+        
+        elif self.current_token.value == "le" or self.current_token.value == "<=":
+            self.read(self.current_token.value)
+            self.parse_A()
+            self.buildTree('le', 2)
+
+        elif self.current_token.value == "eq" :
+            self.read("eq")
+            self.parse_A()
+            self.buildTree('eq', 2)
+
+        elif self.current_token.value == "ne":
+            self.read("ne")
+            self.parse_A()
+            self.buildTree('ne', 2)
+
+
+
+        # print("Parser: parse_Bp")
 
     def parse_A(self):
 
@@ -223,7 +266,7 @@ class Parser:
                 self.buildTree("+", 2)
 
             
-        print("Parser: parse_A")
+        # print("Parser: parse_A")
 
     def parse_At(self):
 
@@ -243,7 +286,7 @@ class Parser:
                 self.buildTree("*", 2)
             
 
-        print("Parser: parse_At")
+        # print("Parser: parse_At")
 
 ################################################################
 
@@ -259,7 +302,7 @@ class Parser:
             # print('Af->Ap ** Af')
             self.buildTree("**", 2)
 
-        print("Parser: parse_Af")
+        # print("Parser: parse_Af")
 
 ###############################################################
 
@@ -269,28 +312,29 @@ class Parser:
         # print('Ap->R')
         while self.current_token.value == '@':
             self.read('@')
-            self.read("<IDENTIFIER>")
+            self.read("IDENTIFIER")
             self.parse_R()
             # print('Ap->R @ R')
             self.buildTree("@", 3)
 
-        print("Parser: parse_Ap")
+        # print("Parser: parse_Ap")
 
     def parse_R(self):
 
         self.parse_Rn()
         while self.current_token.value in ['true', 'false', 'nil', 'dummy','('] or self.current_token.type in ["IDENTIFIER", "STRING", "INTEGER"]:
             # print('Rn->' + str(self.current_token.value))
-            if self.index >= len(self.tokens):
+            if self.pos >= len(self.tokens):
                 break
             self.parse_Rn()
             # print('Rn->' + str(self.current_token.value))
             # self.buildTree("id", 0)
             self.buildTree("gamma", 2)
 
-        print("Parser: parse_R")
+        # print("Parser: parse_R")
 
     def parse_Rn(self):
+
         if self.current_token.value == '(':
             self.read('(')
             self.parse_E()
@@ -298,17 +342,17 @@ class Parser:
            
 
         elif self.current_token.type == "IDENTIFIER":
-            self.read("<IDENTIFIER>")
+            self.read("IDENTIFIER")
             # print('Rn->id')
             
 
         elif self.current_token.type == "STRING":
-            self.read("<STRING>")
+            self.read("STRING")
             # print('Rn->string')
             
 
         elif self.current_token.type == "INTEGER":
-            self.read("<INTEGER>")
+            self.read("INTEGER")
             # print('Rn->int')
             
 
@@ -316,7 +360,7 @@ class Parser:
             self.read(self.current_token.value)
             self.buildTree(self.current_token.value, 0)
             # print('Rn->bool')
-        print("Parser: parse_Rn")
+        # print("Parser: parse_Rn")
 
 
 
@@ -329,7 +373,7 @@ class Parser:
             self.parse_Da()
             self.buildTree('within', 2)
 
-        print("Parser: parse_D")
+        # print("Parser: parse_D")
 
 #####################################################
 
@@ -343,7 +387,7 @@ class Parser:
         if m>1:
             self.buildTree('and', m)
         
-        print("Parser: parse_Da")
+        # print("Parser: parse_Da")
     
     def parse_Dr(self):
 
@@ -355,19 +399,20 @@ class Parser:
         else:
             self.parse_Db()
 
-        print("Parser: parse_Dr")
+        # print("Parser: parse_Dr")
 
     def parse_Db(self):
-
+        
         if self.current_token.value == "(":
             self.read("(")
             self.parse_D()
             self.read(")")
 
             ###################################################
-
+        
         elif self.current_token.type == "IDENTIFIER":
-            self.read("<IDENTIFIER>")
+           
+            self.read("IDENTIFIER")
             p=1
             if self.current_token.value == "(" or self.current_token.type == "IDENTIFIER":
                 vb_count = 0
@@ -377,23 +422,23 @@ class Parser:
                 if self.current_token.value == "=":
                     self.read("=")
                     self.parse_E()
-                    self.buildTree('=', vb_count + 1+p)
+                    self.buildTree('fcn_form', vb_count + 1+p)
 
             elif self.current_token.value == "=":
+                print(self.current_token.value)
                 self.read("=")
                 self.parse_E()
                 self.buildTree('=', 2 )
             
             elif self.current_token.value == ",":
                 self.read(",")
-                self.read("<IDENTIFIER>")
+                self.read("IDENTIFIER")
                 p+= 1
                 while self.current_token.value == ",":
                     self.read(",")
-                    self.read("<IDENTIFIER>")
+                    self.read("IDENTIFIER")
                     p += 1
-                self.buildTree("=", p + 1)
-
+                self.buildTree(",", p )
                 
         # else:
         #     self.parse_Vl()
@@ -402,11 +447,11 @@ class Parser:
         #     self.buildTree('=', 2)
 
 
-        print("Parser: parse_Db")
+        # print("Parser: parse_Db")
 
     def parse_Vb(self):
         if self.current_token.type == "IDENTIFIER":
-            self.read("<IDENTIFIER>")
+            self.read("IDENTIFIER")
            
         elif self.current_token.value == "(":
             self.read("(")
@@ -419,23 +464,26 @@ class Parser:
                 self.read(")")
                 # print('Vb->Vl)')
 
-        print("Parser: parse_Vb")
+        # print("Parser: parse_Vb")
 
 
 ################################################################
 
     def parse_Vl(self):
 
-        self.read("<IDENTIFIER>")
+        self.read("IDENTIFIER")
         v =1
         while self.current_token.value == ",":
             self.read(",")
-            self.read("<IDENTIFIER>")
+            self.read("IDENTIFIER")
             v += 1
 
         self.buildTree(",'", v)
-        print("Parser: parse_Vl")
+        # print("Parser: parse_Vl")
 
+# function to return stack
+    def get_stack(self):
+          return stack
     
     
 
