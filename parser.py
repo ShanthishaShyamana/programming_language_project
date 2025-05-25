@@ -9,7 +9,7 @@ class Parser:
         stack = []  # Initialize the stack to hold AST nodes
 
     def read(self , expected=None):
-        print ("read ", expected)
+        # print ("read ", expected)
 
 
         if expected in ["IDENTIFIER", "STRING", "INTEGER"]:
@@ -31,7 +31,7 @@ class Parser:
 
             # self.read_stack()
             
-            print(terminalNode)
+            # print(terminalNode)
             # return terminalNode
  
         if self.current_token.value in ['true', 'false', 'nil', 'dummy']:
@@ -39,7 +39,7 @@ class Parser:
             terminalNode.value = self.current_token.value
             stack.append(terminalNode)
             # self.read_stack()
-            print(terminalNode)
+            # print(terminalNode)
         #     return terminalNode
         # else:
         #     return self.current_token
@@ -64,7 +64,7 @@ class Parser:
 
         node = ASTnode(token)
         # self.read_stack()
-        print("Parser: buildTree", token, numberOfChildren)
+        # print("Parser: buildTree", token, numberOfChildren)
 
         while numberOfChildren > 0:
             # #print("error in while loop")
