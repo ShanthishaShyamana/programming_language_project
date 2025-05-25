@@ -73,8 +73,8 @@ def main():
     # for token in tokens:
     #     print(token)
 
-    # for i in range(len(tokens)):
-        # print(f"{i}: {tokens[i]}")
+    for i in range(len(tokens)):
+        print(f"{i}: {tokens[i]}")
     
     parser_instance = Parser(tokens)
     parser_instance.parse_E()  # Start parsing from the root rule

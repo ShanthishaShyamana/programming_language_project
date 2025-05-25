@@ -9,7 +9,7 @@ class Parser:
         stack = []  # Initialize the stack to hold AST nodes
 
     def read(self , expected=None):
-        # print ("read ", expected)
+        print ("read ", expected)
 
 
         if expected in ["IDENTIFIER", "STRING", "INTEGER"]:
@@ -31,7 +31,7 @@ class Parser:
 
             # self.read_stack()
             
-            # print(terminalNode)
+            print(terminalNode)
             # return terminalNode
  
         if self.current_token.value in ['true', 'false', 'nil', 'dummy']:
@@ -39,7 +39,7 @@ class Parser:
             terminalNode.value = self.current_token.value
             stack.append(terminalNode)
             # self.read_stack()
-            # print(terminalNode)
+            print(terminalNode)
         #     return terminalNode
         # else:
         #     return self.current_token
@@ -64,7 +64,7 @@ class Parser:
 
         node = ASTnode(token)
         # self.read_stack()
-        # print("Parser: buildTree", token, numberOfChildren)
+        print("Parser: buildTree", token, numberOfChildren)
 
         while numberOfChildren > 0:
             # #print("error in while loop")
@@ -356,9 +356,21 @@ class Parser:
             # print('Rn->int')
             
 
-        elif self.current_token.value in ['true', 'false', 'nil', 'dummy']:
-            self.read(self.current_token.value)
-            self.buildTree(self.current_token.value, 0)
+        elif self.current_token.value == 'true':
+            self.read('true')
+            # self.buildTree('true', 0)
+            
+        elif self.current_token.value == 'false':
+            self.read('false')
+            # self.buildTree('false', 0)
+            
+        elif self.current_token.value == 'nil':
+            self.read('nil')
+            # self.buildTree('nil', 0)
+            
+        elif self.current_token.value == 'dummy':
+            self.read('dummy')
+            # self.buildTree('dummy', 0)
             # print('Rn->bool')
         # print("Parser: parse_Rn")
 
