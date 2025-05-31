@@ -1,0 +1,1 @@
+print (Inc 7) where Inc x = x + 1

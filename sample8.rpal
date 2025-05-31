@@ -1,0 +1,2 @@
+let c = 3 within f x y = x + y + c
+in print (f 3 7)

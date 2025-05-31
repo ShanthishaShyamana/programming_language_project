@@ -60,32 +60,23 @@ class Parser:
     #         print(node)
 
 
-    def buildTree(self , token, numberOfChildren):
-
+    def buildTree(self, token, numberOfChildren):
         node = ASTnode(token)
-        # self.read_stack()
-        # print("Parser: buildTree", token, numberOfChildren)
-
+        # Create a list to store children in reverse order
+        children = []
+        
+        # Pop children from stack and store them
         while numberOfChildren > 0:
-            # #print("error in while loop")
             child = stack[-1]
             stack.pop()
-            # Assuming pop() is a function that returns an ASTNode
-            # if node.child is not None:
-            #     child.sibling = node.child
-            #     node.child.previous = child
-                # node.previous = child
-            node.child.append(child)
-
-            # node.sourceLineNumber = child.sourceLineNumber
+            children.append(child)  # Collect children in temporary list
             numberOfChildren -= 1
-        # node.print_tree()
-
-        stack.append(node)  # Assuming push() is a function that pushes a node onto a stack
-        # #print("stack content after")
-        # for node in stack:
-        #     pass
-            # #print(node.type)
+            
+        # Reverse children so they're in the correct order and set as node's children
+        node.child = children[::-1]
+        
+        # Push the new node onto the stack
+        stack.append(node)
 
 
     def parse_E(self):
@@ -437,7 +428,7 @@ class Parser:
                     self.buildTree('fcn_form', vb_count + 1+p)
 
             elif self.current_token.value == "=":
-                print(self.current_token.value)
+                # print(self.current_token.value)
                 self.read("=")
                 self.parse_E()
                 self.buildTree('=', 2 )
