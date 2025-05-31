@@ -2,6 +2,7 @@ import sys
 import re
 from dataclasses import dataclass
 from parser import Parser
+from standerdizer import standardize
 
 @dataclass
 class Token:
@@ -81,14 +82,27 @@ def main():
 
     # Now print AST
     stack = parser_instance.get_stack()
-    print_ast(stack[-1])  # stack[-1] is the root of the AST
+    # print(len(stack), "nodes in the stack")
+    # print_ast(stack[-1])  # stack[-1] is the root of the AST
+    # print("Standardizing AST...")
+    # Standardize the AST
+
+    # print("Standardizing AST...")
+
+    st = standardize(stack[-1])
+
+    print_st(st)
 
 
 def print_ast(node, indent=0):
     print('.' * indent + node.type if node.value is None else f"{'.' * indent}<{node.type}:{node.value}>")
-    for child in reversed(node.child):  # Print in reverse to maintain correct order
+    for child in (node.child):  
         print_ast(child, indent + 1)
 
+def print_st(node, indent=0):
+    print('.' * indent + node.type if node.value is None else f"{'.' * indent}<{node.type}:{node.value}>")
+    for child in (node.child):  
+        print_ast(child, indent + 1)
 # def main():
 #     if len(sys.argv) < 2:
 #         print("Usage: python myrpal.py file_name")
