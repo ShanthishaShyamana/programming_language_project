@@ -3,6 +3,8 @@ import re
 from dataclasses import dataclass
 from parser import Parser
 from standerdizer import standardize
+from ASTnode import ASTnode
+from csemachine import run_cse_machine
 
 @dataclass
 class Token:
@@ -92,6 +94,11 @@ def main():
     st = standardize(stack[-1])
 
     print_st(st)
+
+    # print("Running CSE machine...")
+    result = run_cse_machine(st)
+
+    print("Final Output:", result)
 
 
 def print_ast(node, indent=0):
