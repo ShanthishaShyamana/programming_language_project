@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from parser import Parser
 from standerdizer import standardize
 from ASTnode import ASTnode
-from csemachine import run_cse_machine
+# from csemachine import run_cse_machine
 
 @dataclass
 class Token:
@@ -96,9 +96,9 @@ def main():
     print_st(st)
 
     # print("Running CSE machine...")
-    result = run_cse_machine(st)
+    # result = run_cse_machine(st)
 
-    print("Final Output:", result)
+    # print("Final Output:", result)
 
 
 def print_ast(node, indent=0):
@@ -110,6 +110,7 @@ def print_st(node, indent=0):
     print('.' * indent + node.type if node.value is None else f"{'.' * indent}<{node.type}:{node.value}>")
     for child in (node.child):  
         print_ast(child, indent + 1)
+
 # def main():
 #     if len(sys.argv) < 2:
 #         print("Usage: python myrpal.py file_name")

@@ -127,21 +127,23 @@ def standardize(node):
         return cur_lambda
 
     elif node.type == "and":
-        # and =++ => (= ,(X++) tau(E++))
+        print(f"Processing 'and' node with {len(node.child)} children")  # Debug
         xs = []
         es = []
-        for eq in node.child:
-            xs.append(standardize(eq.child[0]))
-            es.append(standardize(eq.child[1]))
-
-        tau1 = ASTnode(",")
-        tau1.child = xs
-
-        tau2 = ASTnode("tau")
-        tau2.child = es
-
-        eq_node = ASTnode("=")
-        eq_node.child = [tau1, tau2]
+        for i, eq in enumerate(node.child):
+            print(f"Child {i} of 'and': type={eq.type}, children={len(eq.child)}")  # Debug
+            standardized_eq = standardize(eq)  # Standardize 'rec' or '=' node
+            print(f"After standardization, Child {i}: type={standardized_eq.type}, children={len(standardized_eq.child)}")  # Debug
+            if standardized_eq.type != "=" or len(standardized_eq.child) < 2:
+                raise SyntaxError(f"Expected '=' node with two children in 'and' construct, got type={standardized_eq.type}, children={len(standardized_eq.child)}")
+            xs.append(standardized_eq.child[0])  # Identifier
+            es.append(standardized_eq.child[1])  # Expression
+            tau1 = ASTnode(",")
+            tau1.child = xs
+            tau2 = ASTnode("tau")
+            tau2.child = es
+            eq_node = ASTnode("=")
+            eq_node.child = [tau1, tau2]
         return eq_node
 
     elif node.type == "@":
