@@ -82,7 +82,7 @@ def standardize(node):
         lambda_node = ASTnode("lambda")
         lambda_node.child = [x, e]
 
-        y_node = ASTnode("<ID:Y*>")
+        y_node = ASTnode("Y*>")
 
         gamma_node = ASTnode("gamma")
         gamma_node.child = [y_node, lambda_node]
