@@ -481,7 +481,7 @@ class Parser:
             self.read("IDENTIFIER")
             v += 1
 
-        self.buildTree(",'", v)
+        self.buildTree(",", v)
         # print("Parser: parse_Vl")
 
 # function to return stack

@@ -1,0 +1,1 @@
+let x = 8 in (x ge 0 & x < 10) -> true | false

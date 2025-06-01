@@ -27,6 +27,7 @@ def generate_control_structure(root, i, current_env=0):
         left_child = root.child[0]
         if left_child.type == ",":
             temp.bounded_variable = [child.value for child in left_child.child]
+            # print(f"Lambda {count} bounded variables: {temp.bounded_variable}")
         else:
             temp.bounded_variable = left_child.value
         temp.environment = current_env  # Set environment at definition
@@ -149,7 +150,7 @@ def built_in(function, argument):
     elif function == "Isfunction":
         stack.push(function in builtInFunctions)
     elif function == 'neg':
-        print(f"Applying negation to in built {argument}")  # Debug
+        # print(f"Applying negation to in built {argument}")  # Debug
         if isinstance(argument, int):
             stack.push(-argument)
         else:
@@ -193,6 +194,7 @@ def apply_rules():
             stack.push(symbol)  # Push lambda as-is, environment already set
             #update environment in lambda
             symbol.environment = current_environment
+            # print(f"Lambda {symbol.number} pushed with environment e_{symbol.environment}")  # Debug
 
         # Rule 4: Gamma (function application)
         elif symbol == "gamma":
@@ -440,14 +442,14 @@ def run_cse_machine(ast):
     current_environment = 0
     print_present = False
 
-    print("Generating control structures...")  # Debug
+    # print("Generating control structures...")  # Debug
     generate_control_structure(ast, 0, current_environment)
     # print(f"Control structure 0: {control_structures[0]}")  # Debug
-    print(f"Total control structures generated: {len(control_structures)}")  # Debug
+    # print(f"Total control structures generated: {len(control_structures)}")  # Debug
     #print control structures
     # Uncomment the following lines if you want to see the control structures
     # for i, cs in enumerate(control_structures):
-        # print(f"Control structure {i}: {cs}")
+    #     print(f"Control structure {i}: {cs}")
 
     control.append(environments[0].name)
     control.extend(control_structures[0])
