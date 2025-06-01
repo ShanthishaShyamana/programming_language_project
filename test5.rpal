@@ -1,1 +1,1 @@
-let x = 1 and y = 2 in (x, y) 
+let x = 1 and y = 2 in print (x, y) 

@@ -85,7 +85,7 @@ def main():
     # Now print AST
     stack = parser_instance.get_stack()
     # print(len(stack), "nodes in the stack")
-    # print_ast(stack[-1])  # stack[-1] is the root of the AST
+    print_ast(stack[-1])  # stack[-1] is the root of the AST
     # print("Standardizing AST...")
     # Standardize the AST
 
@@ -93,7 +93,7 @@ def main():
 
     st = standardize(stack[-1])
 
-    # print_st(st)
+    print_st(st)
 
     print("Running CSE machine...")
     result = run_cse_machine(st)
