@@ -10,7 +10,7 @@ control = []
 stack = Stack("CSE")
 environments = [Environment(0, None)]
 current_environment = 0
-builtInFunctions = ["Order", "Print", "print", "Conc", "Stern", "Stem", "Isinteger", "Istruthvalue", "Isstring", "Istuple", "Isfunction", "ItoS"]
+builtInFunctions = ["Order", "Print", "print", "Conc", "Stern", "Stem", "Isinteger", "Istruthvalue", "Isstring", "Istuple", "Isfunction", "ItoS","neg"]
 print_present = False
 
 def generate_control_structure(root, i, current_env=0):
@@ -19,7 +19,7 @@ def generate_control_structure(root, i, current_env=0):
     while len(control_structures) <= i:
         control_structures.append([])
 
-    print(f"Generating control structure for node {root.type}, index {i}, env e_{current_env}")  # Debug
+    # print(f"Generating control structure for node {root.type}, index {i}, env e_{current_env}")  # Debug
     
     if root.type == "lambda":
         count += 1
@@ -36,7 +36,7 @@ def generate_control_structure(root, i, current_env=0):
         body_index = count
         generate_control_structure(root.child[1], body_index, current_env)
         temp.body = control_structures[body_index]
-        print(f"Lambda {count} body: {temp.body}, env e_{current_env}")  # Debug
+        # print(f"Lambda {count} body: {temp.body}, env e_{current_env}")  # Debug
 
     elif root.type == "->":
         count += 1
@@ -60,7 +60,7 @@ def generate_control_structure(root, i, current_env=0):
         for child in root.child:
             generate_control_structure(child, i, current_env)
 
-    elif root.type in ["gamma", ",", "=", "Y*>"]:
+    elif root.type in ["gamma", ",", "=", "Y*"]:
         control_structures[i].append(root.type)
         for child in root.child:
             generate_control_structure(child, i, current_env)
@@ -68,8 +68,8 @@ def generate_control_structure(root, i, current_env=0):
     elif root.type in ["IDENTIFIER", "INTEGER", "STRING", "KEYWORD"]:
         control_structures[i].append(f"<{root.type}:{root.value}>")
     
-    elif root.value:  # Handle operators like +, -, etc.
-        control_structures[i].append(root.value)
+    elif root.type:  # Handle operators like +, -, etc.
+        control_structures[i].append(root.type)
         for child in root.child:
             generate_control_structure(child, i, current_env)
 
@@ -90,12 +90,18 @@ def lookup(name):
         elif data_type == "IDENTIFIER":
             if value in builtInFunctions:
                 return value
+            
+            elif value in ["neg", "not"]:
+                return value
             try:
                 env = environments[current_environment]
                 while env:
                     if value in env.variables:
+                        # print(f"Found {value} = {env.variables[value]} in environment e_{env.number}")  # Debug
                         return env.variables[value]
+                    # print(f"Variable {value} not found in environment e_{env.number}, checking parent...")  # Debug
                     env = env.parent
+                
                 print(f"Undeclared Identifier: {value}")
                 exit(1)
             except KeyError:
@@ -108,7 +114,7 @@ def lookup(name):
                 return True
             elif value == "false":
                 return False
-            elif value == "Y*>":
+            elif value == "Y*":
                 return "Y*"
     return value
 
@@ -142,6 +148,13 @@ def built_in(function, argument):
         stack.push(isinstance(argument, tuple))
     elif function == "Isfunction":
         stack.push(function in builtInFunctions)
+    elif function == 'neg':
+        print(f"Applying negation to in built {argument}")  # Debug
+        if isinstance(argument, int):
+            stack.push(-argument)
+        else:
+            print("Error: neg function can only accept integers.")
+            exit()
     elif function == "ItoS":
         if isinstance(argument, int):
             stack.push(str(argument))
@@ -149,16 +162,27 @@ def built_in(function, argument):
             print("Error: ItoS function can only accept integers.")
             exit()
 
+
 def apply_rules():
     op = ["+", "-", "*", "/", "**", "gr", "ge", "ls", "le", "eq", "ne", "or", "&", "aug"]
     uop = ["neg", "not"]
     global control, current_environment, count
 
+    def extract_current_env_from_control():
+        """Extract the latest environment number from control stack"""
+        for item in reversed(control):
+            if isinstance(item, str) and item.startswith("e_"):
+                return int(item[2:])
+        return current_environment
+
+    # Set the initial current environment
+    current_environment = extract_current_env_from_control() if control else 0
+
     while control:
         if stack.is_empty() and control:
             print(f"Warning: Stack empty, control: {control}")
         symbol = control.pop()
-        print(f"Applying rule for symbol: {symbol}, Stack: {stack.stack}, Control: {control}")  # Debug
+        # print(f"Applying rule for symbol: {symbol}, Stack: {stack.stack}, Control: {control}")  # Debug
 
         # Rule 1: Identifiers, literals
         if isinstance(symbol, str) and symbol.startswith("<") and symbol.endswith(">"):
@@ -167,6 +191,8 @@ def apply_rules():
         # Rule 2: Lambda
         elif isinstance(symbol, Lambda):
             stack.push(symbol)  # Push lambda as-is, environment already set
+            #update environment in lambda
+            symbol.environment = current_environment
 
         # Rule 4: Gamma (function application)
         elif symbol == "gamma":
@@ -175,7 +201,7 @@ def apply_rules():
                 exit(1)
             stack_symbol_1 = stack.pop()
             stack_symbol_2 = stack.pop()
-            print(f"Gamma: Applying {stack_symbol_1} to {stack_symbol_2}")  # Debug
+            # print(f"Gamma: Applying {stack_symbol_1} to {stack_symbol_2}")  # Debug
 
             if isinstance(stack_symbol_1, Lambda):
                 if isinstance(stack_symbol_2, str) and stack_symbol_2.startswith("e_"):
@@ -193,24 +219,54 @@ def apply_rules():
                 child = Environment(current_environment, parent)
                 parent.add_child(child)
                 environments.append(child)
+                if isinstance(bounded_variable, str):
+                    # Single variable - normal application
+                    child.add_variable(bounded_variable, stack_symbol_2)
+                    stack.push(child.name)
+                    control.append(child.name)
+                    control.extend(stack_symbol_1.body)
 
                 # Handle multiple variables (e.g., from 'and' or multi-arg functions)
-                if isinstance(bounded_variable, list):
-                    if len(bounded_variable) > 1:
-                        # Partial application for currying
-                        new_lambda = Lambda(count + 1)
-                        count += 1
-                        new_lambda.bounded_variable = bounded_variable[1:]
-                        new_lambda.environment = current_environment
-                        new_lambda.body = stack_symbol_1.body
+                elif isinstance(bounded_variable, list):
+                    # print('list of bounded variables:', bounded_variable)  # Debug
+                    
+                    if len(bounded_variable) == 1:
+                        # Single variable in a list - treat as normal single variable
                         child.add_variable(bounded_variable[0], stack_symbol_2)
-                        stack.push(new_lambda)
+                        stack.push(child.name)
+                        control.append(child.name)
+                        control.extend(stack_symbol_1.body)
+                        
                     elif isinstance(stack_symbol_2, tuple) and len(stack_symbol_2) == len(bounded_variable):
+                        # Multiple variables with matching tuple of values
+                        # print(f"Applying lambda with multiple variables: {bounded_variable}")  # Debug
                         for var, val in zip(bounded_variable, stack_symbol_2):
                             child.add_variable(var, val)
                         stack.push(child.name)
                         control.append(child.name)
                         control.extend(stack_symbol_1.body)
+                        
+                    elif len(bounded_variable) > 1 and not isinstance(stack_symbol_2, tuple):
+                        # Partial application for currying - bind first variable, return new lambda
+                        # print(f"Partial application: binding {bounded_variable[0]} to {stack_symbol_2}")  # Debug
+                        
+                        # Bind the first variable
+                        child.add_variable(bounded_variable[0], stack_symbol_2)
+                        
+                        # Create new lambda for remaining variables
+                        new_lambda = Lambda(count + 1)
+                        count += 1
+                        new_lambda.bounded_variable = bounded_variable[1:]  # Remaining variables
+                        new_lambda.environment = current_environment  # Current environment (with first var bound)
+                        new_lambda.body = stack_symbol_1.body  # Same body
+                        
+                        # Push the new lambda (no environment marker needed for partial application)
+                        # current_environment = child.number
+                        # stack.push(child.name)
+                        # control.append(child.name)
+                        
+                        stack.push(new_lambda)
+                        
                     else:
                         print(f"Error: Expected tuple of length {len(bounded_variable)} for variables {bounded_variable}, got {stack_symbol_2}")
                         exit(1)
@@ -247,6 +303,7 @@ def apply_rules():
 
             elif stack_symbol_1 in builtInFunctions:
                 built_in(stack_symbol_1, stack_symbol_2)
+                # print(f"Built-in function {stack_symbol_1} applied to {stack_symbol_2}")  # Debug
 
         # Rule 5: Environment
         elif isinstance(symbol, str) and symbol.startswith("e_"):
@@ -267,9 +324,9 @@ def apply_rules():
             if len(stack.stack) < 2:
                 print(f"Error: Stack has {len(stack.stack)} items, need 2 for operator {symbol}")
                 exit(1)
-            rand_2 = stack.pop()
             rand_1 = stack.pop()
-            print(f"Applying {symbol} to {rand_1} and {rand_2}")  # Debug
+            rand_2 = stack.pop()
+            # print(f"Applying {symbol} to {rand_1} and {rand_2}")  # Debug
             try:
                 if symbol == "+":
                     stack.push(rand_1 + rand_2)
@@ -315,7 +372,11 @@ def apply_rules():
             if symbol == "not":
                 stack.push(not rand)
             elif symbol == "neg":
+                # print(f"Applying negation to {rand}")  # Debug
+                # print(f"Stack before negation: {stack.stack}")  # Debug
                 stack.push(-rand)
+                # print(f"Result after negation: ")  # Debug
+
 
         # Rule 8: Beta (conditional)
         elif symbol == "beta":
@@ -339,7 +400,7 @@ def apply_rules():
             tau_list = []
             for _ in range(n):
                 tau_list.append(stack.pop())
-            stack.push(tuple(reversed(tau_list)))
+            stack.push(tuple((tau_list)))
 
         # Rule 12: Y*
         elif symbol == "Y*":
@@ -381,13 +442,19 @@ def run_cse_machine(ast):
 
     print("Generating control structures...")  # Debug
     generate_control_structure(ast, 0, current_environment)
-    print(f"Control structure 0: {control_structures[0]}")  # Debug
+    # print(f"Control structure 0: {control_structures[0]}")  # Debug
+    print(f"Total control structures generated: {len(control_structures)}")  # Debug
+    #print control structures
+    # Uncomment the following lines if you want to see the control structures
+    # for i, cs in enumerate(control_structures):
+        # print(f"Control structure {i}: {cs}")
+
     control.append(environments[0].name)
     control.extend(control_structures[0])
     stack.push(environments[0].name)
     
     print("Starting CSE evaluation...")  # Debug
     result = apply_rules()
-    if print_present:
-        print(result)
+    # if print_present:
+    #     print(result)
     return result
