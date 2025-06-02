@@ -455,7 +455,7 @@ def run_cse_machine(ast):
     control.extend(control_structures[0])
     stack.push(environments[0].name)
     
-    print("Starting CSE evaluation...")  # Debug
+    # print("Starting CSE evaluation...")  # Debug
     result = apply_rules()
     # if print_present:
     #     print(result)

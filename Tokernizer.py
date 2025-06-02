@@ -63,11 +63,26 @@ def tokenize(code):
     return tokens
 
 def main():
-    if len(sys.argv) < 3 or sys.argv[1] != '-ast':
-        print("Usage: python myrpal.py -ast file_name")
+    if len(sys.argv) < 2:
+        print("Usage: python Tokernizer.py [-ast|-st] file_name or python Tokernizer.py file_name")
         sys.exit(1)
 
-    filename = sys.argv[2]
+    flag = None
+    filename = None
+
+    if sys.argv[1].startswith('-'):
+        if sys.argv[1] not in ['-ast', '-st']:
+            print("Usage: python Tokernizer.py [-ast|-st] file_name or python Tokernizer.py file_name")
+            sys.exit(1)
+        if len(sys.argv) < 3:
+            print("Usage: python Tokernizer.py [-ast|-st] file_name")
+            sys.exit(1)
+        flag = sys.argv[1]
+        filename = sys.argv[2]
+    else:
+        filename = sys.argv[1]
+        flag = ''  # Default to CSE if no flag is provided
+
     with open(filename, 'r') as f:
         code = f.read()
 
@@ -85,20 +100,38 @@ def main():
     # Now print AST
     stack = parser_instance.get_stack()
     # print(len(stack), "nodes in the stack")
-    print_ast(stack[-1])  # stack[-1] is the root of the AST
+    # print_ast(stack[-1])  # stack[-1] is the root of the AST
     # print("Standardizing AST...")
     # Standardize the AST
 
     # print("Standardizing AST...")
 
-    st = standardize(stack[-1])
+    if flag == '-ast':
+        # Print only the AST
+        if stack:
+            print_ast(stack[-1])
+        else:
+            print("Error: No AST generated")
+            sys.exit(1)
 
-    print_st(st)
+    elif flag == '-st':
+        # Print only the standardized AST
+        if stack:
+            st = standardize(stack[-1])
+            print_st(st)
+        else:
+            print("Error: No AST generated for standardization")
+            sys.exit(1)
 
-    print("Running CSE machine...")
-    result = run_cse_machine(st)
-
-    print("Final Output:", result)
+    elif flag == '':
+        # Print only the CSE machine output
+        if stack:
+            st = standardize(stack[-1])
+            result = run_cse_machine(st)
+            print(result)
+        else:
+            print("Error: No AST generated for CSE machine")
+            sys.exit(1)
 
 
 def print_ast(node, indent=0):
