@@ -127,13 +127,13 @@ def standardize(node):
         return cur_lambda
 
     elif node.type == "and":
-        print(f"Processing 'and' node with {len(node.child)} children")  # Debug
+        # print(f"Processing 'and' node with {len(node.child)} children")  # Debug
         xs = []
         es = []
         for i, eq in enumerate(node.child):
-            print(f"Child {i} of 'and': type={eq.type}, children={len(eq.child)}")  # Debug
+            # print(f"Child {i} of 'and': type={eq.type}, children={len(eq.child)}")  # Debug
             standardized_eq = standardize(eq)  # Standardize 'rec' or '=' node
-            print(f"After standardization, Child {i}: type={standardized_eq.type}, children={len(standardized_eq.child)}")  # Debug
+            # print(f"After standardization, Child {i}: type={standardized_eq.type}, children={len(standardized_eq.child)}")  # Debug
             if standardized_eq.type != "=" or len(standardized_eq.child) < 2:
                 raise SyntaxError(f"Expected '=' node with two children in 'and' construct, got type={standardized_eq.type}, children={len(standardized_eq.child)}")
             xs.append(standardized_eq.child[0])  # Identifier
@@ -148,9 +148,10 @@ def standardize(node):
 
     elif node.type == "@":
         # @ N E1 E2 => gamma (gamma N E1) E2
-        n = standardize(node.child[0])
-        e1 = standardize(node.child[1])
+        e1 = standardize(node.child[0])
+        n = standardize(node.child[1])
         e2 = standardize(node.child[2])
+        # print(f"Standardizing '@' node: N={n.type}, E1={e1.type}, E2={e2.type}")
 
         gamma1 = ASTnode("gamma")
         gamma1.child = [n, e1]

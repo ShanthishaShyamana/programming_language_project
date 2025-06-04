@@ -25,9 +25,9 @@ KEYWORDS = {
 token_specification = [
     ('COMMENT', r'//.*'),
     ('SKIP', r'[ \t\r\n]+'),
-    ('STRING', r"'(\\'|\\\\|\\t|\\n|[^'])*'"),
-    ('IDENTIFIER', r'[A-Za-z][A-Za-z0-9_]*'),
-    ('INTEGER', r'\d+'),
+    ('STR', r"'(\\'|\\\\|\\t|\\n|[^'])*'"),
+    ('ID', r'[A-Za-z][A-Za-z0-9_]*'),
+    ('INT', r'\d+'),
     ('OPERATOR', r'[\+\-\*\/<>&\.@:=~|$!#%^_\[\]{}\"‘\?]+'),
     ('PUNCTUATION', r'[(),;]'),
     ('MISMATCH', r'.'),
@@ -45,15 +45,15 @@ def tokenize(code):
 
         if kind in {'SKIP', 'COMMENT'}:
             continue
-        elif kind == 'IDENTIFIER':
+        elif kind == 'ID':
             if value in KEYWORDS:
                 tokens.append(Token("KEYWORD", value))
             else:
-                tokens.append(Token("IDENTIFIER", value))
-        elif kind == 'INTEGER':
-            tokens.append(Token("INTEGER", value))
-        elif kind == 'STRING':
-            tokens.append(Token("STRING", value))
+                tokens.append(Token("ID", value))
+        elif kind == 'INT':
+            tokens.append(Token("INT", value))
+        elif kind == 'STR':
+            tokens.append(Token("STR", value))
         elif kind == 'OPERATOR':
             tokens.append(Token("OPERATOR", value))
         elif kind == 'PUNCTUATION':

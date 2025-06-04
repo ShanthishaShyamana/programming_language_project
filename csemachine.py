@@ -66,7 +66,7 @@ def generate_control_structure(root, i, current_env=0):
         for child in root.child:
             generate_control_structure(child, i, current_env)
 
-    elif root.type in ["IDENTIFIER", "INTEGER", "STRING", "KEYWORD"]:
+    elif root.type in ["ID", "INT", "STR", "KEYWORD"]:
         control_structures[i].append(f"<{root.type}:{root.value}>")
     
     elif root.type:  # Handle operators like +, -, etc.
@@ -84,11 +84,11 @@ def lookup(name):
         value = info[0]
     else:
         data_type, value = info
-        if data_type == "INTEGER":
+        if data_type == "INT":
             return int(value)
-        elif data_type == "STRING":
+        elif data_type == "STR":
             return value.strip("'")
-        elif data_type == "IDENTIFIER":
+        elif data_type == "ID":
             if value in builtInFunctions:
                 return value
             
@@ -96,6 +96,8 @@ def lookup(name):
                 return value
             try:
                 env = environments[current_environment]
+                
+                # print(f"Looking up {value} in environment e_{env.number}")  # Debug
                 while env:
                     if value in env.variables:
                         # print(f"Found {value} = {env.variables[value]} in environment e_{env.number}")  # Debug
@@ -183,6 +185,7 @@ def apply_rules():
         if stack.is_empty() and control:
             print(f"Warning: Stack empty, control: {control}")
         symbol = control.pop()
+        # print(f"Processing symbol: {symbol}")  # Debug
         # print(f"Applying rule for symbol: {symbol}, Stack: {stack.stack}, Control: {control}")  # Debug
 
         # Rule 1: Identifiers, literals
@@ -317,8 +320,21 @@ def apply_rules():
                 current_environment = int(symbol[2:])
             else:
                 stack_symbol = stack.pop()
+                # print(stack_symbol)  # Debug
                 stack.pop()  # Remove environment
-                current_environment = int(symbol[2:])
+                # Find the last environment marker in the stack
+                stack_copy = stack.stack.copy()
+                found_env = False
+                while stack_copy and not found_env:
+                    env_marker = stack_copy.pop()
+                    if isinstance(env_marker, str) and env_marker.startswith("e_"):
+                        current_environment = int(env_marker[2:])
+                        found_env = True
+                
+                # If no environment found in stack, use the one from the symbol
+                if not found_env:
+                    current_environment = int(symbol[2:])
+                # print(f"Current environment set to e_{current_environment}  klkllkl")  # Debug
                 stack.push(stack_symbol)
 
         # Rule 6: Binary operators
