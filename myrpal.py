@@ -92,7 +92,7 @@ def main():
     #     print(token)
 
     # for i in range(len(tokens)):
-    #     print(f"{i}: {tokens[i]}")
+    #     print(f"{i+1}: {tokens[i]}")
     
     parser_instance = Parser(tokens)
     parser_instance.parse_E()  # Start parsing from the root rule

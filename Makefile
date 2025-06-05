@@ -1,30 +1,34 @@
 # Makefile for RPAL Interpreter
 
 PYTHON = python
-MAIN = Tokernizer.py
-
-
-# Paths
-TEST_DIR = Tests
+MAIN = myrpal.py
 
 all:
 	@echo "Usage:"
-	@echo "  make run FILE=<file.rpal>     # Run full interpreter"
-	@echo "  make ast FILE=<file.rpal>     # Output AST"
-	@echo "  make st FILE=<file.rpal>      # Output Standardized Tree"
-	@echo 
+	@echo "  make run FILE=sample1.rpal            # Run full interpreter"
+	@echo "  make -ast FILE=tests/sample1.rpal      # Show AST (any path)"
+	@echo "  make -st FILE=sample1.rpal             # Show ST"
+	@echo
 
+# Run full interpreter
 run:
-	$(PYTHON) $(MAIN) $(TEST_DIR)/$(FILE)
+	$(PYTHON) $(MAIN) $(FILE)
 
+# Print Abstract Syntax Tree
 ast:
-	$(PYTHON) $(MAIN) -ast $(TEST_DIR)/$(FILE)
+	$(PYTHON) $(MAIN) -ast $(FILE)
 
+# Print Standardized Tree
 st:
-	$(PYTHON) $(MAIN) -st $(TEST_DIR)/$(FILE)
+	$(PYTHON) $(MAIN) -st $(FILE)
 
+# Aliases for dash-style
+-ast: ast
+-st: st
+
+# Clean cache
 clean:
 	find . -type f -name '*.pyc' -delete
 	find . -type d -name '__pycache__' -exec rm -r {} +
 
-.PHONY: all run ast st clean
+.PHONY: all run ast st -ast -st clean
